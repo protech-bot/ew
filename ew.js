@@ -22,7 +22,7 @@
         duration: 3800
     };
 
-    // === 3. Cấu hình CSS động (Responsive: Ngang trên PC, Dọc trên Mobile, Phóng to cực đại) ===
+    // === 3. Cấu hình CSS động (Cho phép xuống dòng linh hoạt, tự bọc cụm khi quá nhiều logo) ===
     const style = document.createElement('style');
     let ewSpecificCSS = '';
 
@@ -110,13 +110,17 @@
         }
         ${ewSpecificCSS}
 
+        /* Cho phép .ew-content co giãn và tự động xuống dòng (wrap) khi vượt quá chiều rộng */
         .ew-content {
             display: flex; 
+            flex-direction: row; 
+            flex-wrap: wrap; 
             align-items: center; 
             justify-content: center; 
             text-align: center;
-            max-width: 98vw; 
+            max-width: 850px; 
             opacity: 0; 
+            gap: 18px 24px;
             transform: ${ewStyle === 'explosion' ? 'scale(0.3)' : (ewStyle === 'astronaut' ? 'scale(0.2)' : 'scale(0.85)')};
             transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 20;
@@ -125,66 +129,49 @@
         .ew-content.ew-fade-out { opacity: 0; transform: scale(1.15); transition: opacity 0.4s ease; }
 
         .ew-item-group {
-            display: flex; align-items: center; gap: 14px;
+            display: flex; align-items: center; gap: 12px;
         }
+        
+        /* Kích thước logo to rõ ràng, cân đối */
         .ew-main-logo {
-            width: 110px; height: 110px; object-fit: contain;
-            filter: drop-shadow(0 0 25px rgba(0, 240, 255, 0.9));
+            width: 85px; height: 85px; object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8));
         }
         .ew-sub-logo {
-            width: 75px; height: 75px; object-fit: contain;
-            filter: drop-shadow(0 0 18px rgba(0, 240, 255, 0.7));
+            width: 58px; height: 58px; object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
         }
+
         .ew-text-box {
             display: flex; flex-direction: column; align-items: flex-start; text-align: left;
         }
+        
         .ew-title {
-            color: #ffffff; font-size: 34px; font-weight: 700;
-            letter-spacing: 3px; text-transform: uppercase;
-            text-shadow: 0 0 15px rgba(0, 240, 255, 0.8); white-space: nowrap;
-        }
-        .ew-subtitle {
-            color: #00f0ff; font-size: 22px; font-weight: 600;
-            letter-spacing: 2px; text-transform: uppercase;
+            color: #ffffff; font-size: 26px; font-weight: 700;
+            letter-spacing: 2.5px; text-transform: uppercase;
             text-shadow: 0 0 12px rgba(0, 240, 255, 0.7); white-space: nowrap;
         }
+        .ew-subtitle {
+            color: #00f0ff; font-size: 18px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); white-space: nowrap;
+        }
         .ew-multiplier {
-            color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 700;
-            font-family: monospace; user-select: none; margin: 0 12px;
+            color: rgba(255, 255, 255, 0.6); font-size: 22px; font-weight: 700;
+            font-family: monospace; user-select: none; margin: 0 4px;
         }
 
-        /* === RESPONSIVE THÔNG MINH === */
-        @media (min-width: 768px) {
-            /* MÁY TÍNH (PC / LAPTOP): XẾP NGANG HÀNG TUYỆT ĐỐI */
+        /* Tự động tối ưu giao diện trên thiết bị di động */
+        @media (max-width: 768px) {
             .ew-content {
-                flex-direction: row;
-                flex-wrap: nowrap;
-                gap: 20px;
+                max-width: 95vw;
+                gap: 12px 16px;
             }
-        }
-
-        @media (max-width: 767px) {
-            /* SMARTPHONE: XẾP DỌC (TẦNG) TRUNG TÂM, CĂN ĐỀU ĐẸP MẮT */
-            .ew-content {
-                flex-direction: column;
-                flex-wrap: wrap;
-                gap: 16px;
-            }
-            .ew-item-group {
-                justify-content: center;
-                text-align: center;
-            }
-            .ew-text-box {
-                align-items: center;
-                text-align: center;
-            }
-            .ew-multiplier {
-                display: none; /* Ẩn dấu nhân hoặc chuyển thành ngắt dòng tinh tế trên mobile */
-            }
-            .ew-main-logo { width: 95px; height: 95px; }
-            .ew-sub-logo { width: 65px; height: 65px; }
-            .ew-title { font-size: 26px; white-space: normal; }
-            .ew-subtitle { font-size: 18px; white-space: normal; }
+            .ew-main-logo { width: 65px; height: 65px; }
+            .ew-sub-logo { width: 45px; height: 45px; }
+            .ew-title { font-size: 18px; }
+            .ew-subtitle { font-size: 13px; }
+            .ew-multiplier { font-size: 16px; }
         }
     `;
     document.head.appendChild(style);
@@ -203,7 +190,7 @@
         </div>
     `);
 
-    // Các cụm tiếp theo: Logo phụ + Tên tương ứng của từng logo phụ
+    // Các cụm tiếp theo: Logo phụ + Tên riêng của từng logo phụ
     CONFIG.subLogos.forEach((logoUrl, index) => {
         let subNameText = CONFIG.subNames[index] || ""; 
         htmlParts.push(`<span class="ew-multiplier">&times;</span>`);
