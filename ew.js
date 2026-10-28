@@ -22,7 +22,7 @@
         duration: 3800
     };
 
-    // === 3. Cấu hình CSS động ===
+    // === 3. Cấu hình CSS động (Phóng to, ép nằm trên 1 hàng ngang tuyệt đối) ===
     const style = document.createElement('style');
     let ewSpecificCSS = '';
 
@@ -106,13 +106,20 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 999999; font-family: system-ui, -apple-system, sans-serif;
-            overflow: hidden; transition: opacity 0.5s ease; box-sizing: border-box; padding: 20px;
+            overflow: hidden; transition: opacity 0.5s ease; box-sizing: border-box; padding: 10px;
         }
         ${ewSpecificCSS}
 
         .ew-content {
-            display: flex; align-items: center; justify-content: center; text-align: center;
-            max-width: 95vw; opacity: 0; flex-wrap: wrap; gap: 20px;
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center;
+            max-width: 98vw; 
+            opacity: 0; 
+            flex-wrap: nowrap; 
+            gap: 18px;
             transform: ${ewStyle === 'explosion' ? 'scale(0.3)' : (ewStyle === 'astronaut' ? 'scale(0.2)' : 'scale(0.85)')};
             transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 20;
@@ -124,34 +131,37 @@
             display: flex; align-items: center; gap: 12px;
         }
         .ew-main-logo {
-            width: 75px; height: 75px; object-fit: contain;
-            filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.7));
+            width: 95px; height: 95px; object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8));
         }
         .ew-sub-logo {
-            width: 50px; height: 50px; object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
+            width: 65px; height: 65px; object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
         }
         .ew-text-box {
             display: flex; flex-direction: column; align-items: flex-start; text-align: left;
         }
         .ew-title {
-            color: #ffffff; font-size: clamp(18px, 4vw, 24px); font-weight: 700;
+            color: #ffffff; font-size: clamp(22px, 4.5vw, 32px); font-weight: 700;
             letter-spacing: 3px; text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.7); white-space: nowrap;
         }
         .ew-subtitle {
-            color: #00f0ff; font-size: clamp(12px, 2.5vw, 15px); font-weight: 600;
+            color: #00f0ff; font-size: clamp(15px, 3vw, 22px); font-weight: 600;
             letter-spacing: 2px; text-transform: uppercase;
-            text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); white-space: nowrap;
         }
         .ew-multiplier {
-            color: rgba(255, 255, 255, 0.6); font-size: 22px; font-weight: 600;
-            font-family: monospace; user-select: none; margin: 0 4px;
+            color: rgba(255, 255, 255, 0.7); font-size: 28px; font-weight: 700;
+            font-family: monospace; user-select: none; margin: 0 6px;
         }
     `;
     document.head.appendChild(style);
 
+    // === 4. Xây dựng cấu trúc HTML từng cặp Logo + Tên riêng biệt ===
     let htmlParts = [];
+
+    // Cụm 1: Logo chính + Tên chính
     htmlParts.push(`
         <div class="ew-item-group">
             <img src="${CONFIG.mainLogoUrl}" alt="Main Logo" class="ew-main-logo">
@@ -162,6 +172,7 @@
         </div>
     `);
 
+    // Các cụm tiếp theo: Logo phụ + Tên tương ứng của từng logo phụ
     CONFIG.subLogos.forEach((logoUrl, index) => {
         let subNameText = CONFIG.subNames[index] || ""; 
         htmlParts.push(`<span class="ew-multiplier">&times;</span>`);
@@ -192,6 +203,7 @@
         document.addEventListener('DOMContentLoaded', () => document.body.prepend(splash));
     }
 
+    // === 5. Điều phối Timeline Hiệu ứng ===
     function runSplash() {
         const content = splash.querySelector('.ew-content');
         if (!content) return;
