@@ -22,7 +22,7 @@
         duration: 3800
     };
 
-    // === 3. Cấu hình CSS động (Phóng to, ép nằm trên 1 hàng ngang tuyệt đối) ===
+    // === 3. Cấu hình CSS động (Responsive: Ngang trên PC, Dọc trên Mobile, Phóng to cực đại) ===
     const style = document.createElement('style');
     let ewSpecificCSS = '';
 
@@ -106,20 +106,17 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 999999; font-family: system-ui, -apple-system, sans-serif;
-            overflow: hidden; transition: opacity 0.5s ease; box-sizing: border-box; padding: 10px;
+            overflow: hidden; transition: opacity 0.5s ease; box-sizing: border-box; padding: 20px;
         }
         ${ewSpecificCSS}
 
         .ew-content {
             display: flex; 
-            flex-direction: row; 
             align-items: center; 
             justify-content: center; 
             text-align: center;
             max-width: 98vw; 
             opacity: 0; 
-            flex-wrap: nowrap; 
-            gap: 18px;
             transform: ${ewStyle === 'explosion' ? 'scale(0.3)' : (ewStyle === 'astronaut' ? 'scale(0.2)' : 'scale(0.85)')};
             transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 20;
@@ -128,32 +125,66 @@
         .ew-content.ew-fade-out { opacity: 0; transform: scale(1.15); transition: opacity 0.4s ease; }
 
         .ew-item-group {
-            display: flex; align-items: center; gap: 12px;
+            display: flex; align-items: center; gap: 14px;
         }
         .ew-main-logo {
-            width: 95px; height: 95px; object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8));
+            width: 110px; height: 110px; object-fit: contain;
+            filter: drop-shadow(0 0 25px rgba(0, 240, 255, 0.9));
         }
         .ew-sub-logo {
-            width: 65px; height: 65px; object-fit: contain;
-            filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
+            width: 75px; height: 75px; object-fit: contain;
+            filter: drop-shadow(0 0 18px rgba(0, 240, 255, 0.7));
         }
         .ew-text-box {
             display: flex; flex-direction: column; align-items: flex-start; text-align: left;
         }
         .ew-title {
-            color: #ffffff; font-size: clamp(22px, 4.5vw, 32px); font-weight: 700;
+            color: #ffffff; font-size: 34px; font-weight: 700;
             letter-spacing: 3px; text-transform: uppercase;
-            text-shadow: 0 0 12px rgba(0, 240, 255, 0.7); white-space: nowrap;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.8); white-space: nowrap;
         }
         .ew-subtitle {
-            color: #00f0ff; font-size: clamp(15px, 3vw, 22px); font-weight: 600;
+            color: #00f0ff; font-size: 22px; font-weight: 600;
             letter-spacing: 2px; text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); white-space: nowrap;
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.7); white-space: nowrap;
         }
         .ew-multiplier {
-            color: rgba(255, 255, 255, 0.7); font-size: 28px; font-weight: 700;
-            font-family: monospace; user-select: none; margin: 0 6px;
+            color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 700;
+            font-family: monospace; user-select: none; margin: 0 12px;
+        }
+
+        /* === RESPONSIVE THÔNG MINH === */
+        @media (min-width: 768px) {
+            /* MÁY TÍNH (PC / LAPTOP): XẾP NGANG HÀNG TUYỆT ĐỐI */
+            .ew-content {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            /* SMARTPHONE: XẾP DỌC (TẦNG) TRUNG TÂM, CĂN ĐỀU ĐẸP MẮT */
+            .ew-content {
+                flex-direction: column;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+            .ew-item-group {
+                justify-content: center;
+                text-align: center;
+            }
+            .ew-text-box {
+                align-items: center;
+                text-align: center;
+            }
+            .ew-multiplier {
+                display: none; /* Ẩn dấu nhân hoặc chuyển thành ngắt dòng tinh tế trên mobile */
+            }
+            .ew-main-logo { width: 95px; height: 95px; }
+            .ew-sub-logo { width: 65px; height: 65px; }
+            .ew-title { font-size: 26px; white-space: normal; }
+            .ew-subtitle { font-size: 18px; white-space: normal; }
         }
     `;
     document.head.appendChild(style);
