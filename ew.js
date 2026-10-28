@@ -19,6 +19,14 @@
         mainName: FIXED_MAIN_NAME,
         subName: subNameAttr ? subNameAttr.trim() : "",
         duration: 3800 // Tổng thời gian chạy hiệu ứng (ms)
+        const subLogosArray = subLogosAttr ? subLogosAttr.split(',').map(s => s.trim()).filter(Boolean) : [];
+    
+        // === THÊM ĐOẠN NÀY ĐỂ TỰ ĐỘNG CO GIÃN LOGO THEO SỐ LƯỢNG ===
+        const totalLogosCount = 1 + subLogosArray.length;
+        let logoSize = 65;
+        let gapSize = 14;
+        if (totalLogosCount > 3) { logoSize = 50; gapSize = 10; }
+        if (totalLogosCount > 5) { logoSize = 40; gapSize = 8; }
     };
 
     // === 3. Cấu hình CSS động (Dùng tiền tố ew) ===
@@ -152,6 +160,10 @@
             font-family: system-ui, -apple-system, sans-serif;
             overflow: hidden;
             transition: opacity 0.5s ease;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 999999; font-family: system-ui, -apple-system, sans-serif;
+            overflow: hidden; transition: opacity 0.5s ease; box-sizing: border-box; padding: 20px;
         }
         ${ewSpecificCSS}
 
@@ -161,9 +173,50 @@
             align-items: center;
             opacity: 0;
             transform: ${ewStyle === 'explosion' ? 'scale(0.3)' : (ewStyle === 'astronaut' ? 'scale(0.2)' : 'scale(0.85)')};
-            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 20;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            max-width: 90vw; opacity: 0;
+            transform: ${ewStyle === 'explosion' ? 'scale(0.3)' : (ewStyle === 'astronaut' ? 'scale(0.2)' : 'scale(0.85)')};
         }
+        .ew-content.ew-show { opacity: 1; transform: scale(1); }
+        .ew-content.ew-fade-out { opacity: 0; transform: scale(1.15); transition: opacity 0.4s ease; }
+
+        /* === PHẦN TỰ ĐỘNG CĂN CHỈNH LOGO === */
+        .ew-logos-wrapper {
+            display: flex; align-items: center; justify-content: center;
+            gap: ${gapSize}px; margin-bottom: 20px; flex-wrap: wrap; max-width: 100%;
+        }
+
+        .ew-logo-item {
+            width: ${logoSize}px; height: ${logoSize}px;
+            object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+
+        .ew-multiplier {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: ${Math.max(16, logoSize * 0.35)}px;
+            font-weight: 600; font-family: monospace;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.4); user-select: none;
+        }
+
+        /* === PHẦN TỰ ĐỘNG CĂN CHỈNH TÊN === */
+        .ew-names-wrapper {
+            display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%;
+        }
+
+        .ew-title {
+            color: #ffffff; font-size: clamp(18px, 4vw, 26px); font-weight: 700;
+            letter-spacing: 4px; text-transform: uppercase;
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6); word-break: break-word;
+        }
+
+        .ew-subtitle {
+            color: #00f0ff; font-size: clamp(12px, 2.5vw, 15px); font-weight: 600;
+            letter-spacing: 3px; text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.5); word-break: break-word;
+        }
+
         .ew-content.ew-show {
             opacity: 1;
             transform: scale(1);
@@ -224,6 +277,8 @@
             text-transform: uppercase;
             text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
         }
+
+        
     `;
     document.head.appendChild(style);
 
