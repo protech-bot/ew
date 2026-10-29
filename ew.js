@@ -13,20 +13,32 @@
     const subLogosArray = subLogosAttr ? subLogosAttr.split(',').map(s => s.trim()).filter(Boolean) : [];
     const subNamesArray = subNamesAttr ? subNamesAttr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-    const CONFIG = {
-        mainLogoUrl: FIXED_MAIN_LOGO,
-        mainName: FIXED_MAIN_NAME,
-        subLogos: subLogosArray,
-        subNames: subNamesArray,
-        singleSubName: subNameSingleAttr ? subNameSingleAttr.trim() : "",
-        duration: 3800
-    };
+    // Tổng hợp danh sách tất cả các bước cần trình chiếu
+    const sequenceList = [];
+    sequenceList.push({
+        logo: FIXED_MAIN_LOGO,
+        title: FIXED_MAIN_NAME,
+        subtitle: subNameSingleAttr ? subNameSingleAttr.trim() : ""
+    });
 
-    // === 3. Cấu hình CSS động (Cho phép xuống dòng linh hoạt, tự bọc cụm khi quá nhiều logo) ===
+    subLogosArray.forEach((logoUrl, index) => {
+        sequenceList.push({
+            logo: logoUrl,
+            title: subNamesArray[index] || `SUB ${index + 1}`,
+            subtitle: ""
+        });
+    });
+
+    // === 3. Cấu hình CSS động (Hỗ trợ đầy đủ các kiểu cũ + kiểu 'slide' mới) ===
     const style = document.createElement('style');
     let ewSpecificCSS = '';
 
     switch (ewStyle) {
+        case 'slide':
+            ewSpecificCSS = `
+                #ew-screen { background-color: #030712; }
+            `;
+            break;
         case 'explosion':
             ewSpecificCSS = `
                 #ew-screen { background-color: #050202; }
@@ -110,110 +122,56 @@
         }
         ${ewSpecificCSS}
 
-        /* Cho phép .ew-content co giãn và tự động xuống dòng (wrap) khi vượt quá chiều rộng */
-        .ew-content {
-            display: flex; 
-            flex-direction: row; 
-            flex-wrap: wrap; 
-            align-items: center; 
-            justify-content: center; 
-            text-align: center;
-            max-width: 850px; 
-            opacity: 0; 
-            gap: 18px 24px;
-            transform: ${ewStyle === 'explosion' ? 'scale(0.3)' : (ewStyle === 'astronaut' ? 'scale(0.2)' : 'scale(0.85)')};
-            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 20;
+        /* Khung hiển thị cho chế độ slide hoặc hiển thị thông thường */
+        .ew-content-box {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            opacity: 0; transform: scale(0.85);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 20; gap: 16px;
         }
-        .ew-content.ew-show { opacity: 1; transform: scale(1); }
-        .ew-content.ew-fade-out { opacity: 0; transform: scale(1.15); transition: opacity 0.4s ease; }
+        .ew-content-box.ew-show { opacity: 1; transform: scale(1); }
+        .ew-content-box.ew-hide { opacity: 0; transform: scale(1.1); transition: opacity 0.4s ease, transform 0.4s ease; }
 
-        .ew-item-group {
-            display: flex; align-items: center; gap: 12px;
+        .ew-logo-img {
+            width: 105px; height: 105px; object-fit: contain;
+            filter: drop-shadow(0 0 25px rgba(0, 240, 255, 0.9));
         }
-        
-        /* Kích thước logo to rõ ràng, cân đối */
-        .ew-main-logo {
-            width: 85px; height: 85px; object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8));
+        .ew-text-group {
+            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px;
         }
-        .ew-sub-logo {
-            width: 58px; height: 58px; object-fit: contain;
-            filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
-        }
-
-        .ew-text-box {
-            display: flex; flex-direction: column; align-items: flex-start; text-align: left;
-        }
-        
         .ew-title {
-            color: #ffffff; font-size: 26px; font-weight: 700;
-            letter-spacing: 2.5px; text-transform: uppercase;
-            text-shadow: 0 0 12px rgba(0, 240, 255, 0.7); white-space: nowrap;
+            color: #ffffff; font-size: clamp(24px, 5vw, 36px); font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
         }
         .ew-subtitle {
-            color: #00f0ff; font-size: 18px; font-weight: 600;
+            color: #00f0ff; font-size: clamp(14px, 3vw, 20px); font-weight: 600;
             letter-spacing: 2px; text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); white-space: nowrap;
-        }
-        .ew-multiplier {
-            color: rgba(255, 255, 255, 0.6); font-size: 22px; font-weight: 700;
-            font-family: monospace; user-select: none; margin: 0 4px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
         }
 
-        /* Tự động tối ưu giao diện trên thiết bị di động */
-        @media (max-width: 768px) {
-            .ew-content {
-                max-width: 95vw;
-                gap: 12px 16px;
-            }
-            .ew-main-logo { width: 65px; height: 65px; }
-            .ew-sub-logo { width: 45px; height: 45px; }
-            .ew-title { font-size: 18px; }
-            .ew-subtitle { font-size: 13px; }
-            .ew-multiplier { font-size: 16px; }
+        /* Trường hợp dùng các kiểu thông thường (lg, sony, samsung...) hiển thị chung 1 khung */
+        .ew-static-wrap {
+            display: flex; flex-direction: row; align-items: center; justify-content: center; text-align: center;
+            gap: 20px; opacity: 0; transform: scale(0.85); flex-wrap: wrap;
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 20; max-width: 95vw;
         }
+        .ew-static-wrap.ew-show { opacity: 1; transform: scale(1); }
+        .ew-static-wrap.ew-fade-out { opacity: 0; transform: scale(1.15); transition: opacity 0.4s ease; }
+        
+        .ew-item-group { display: flex; align-items: center; gap: 12px; }
+        .ew-main-logo-static { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8)); }
+        .ew-sub-logo-static { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6)); }
+        .ew-text-box-static { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+        .ew-multiplier { color: rgba(255, 255, 255, 0.7); font-size: 26px; font-weight: 700; font-family: monospace; }
     `;
     document.head.appendChild(style);
-
-    // === 4. Xây dựng cấu trúc HTML từng cặp Logo + Tên riêng biệt ===
-    let htmlParts = [];
-
-    // Cụm 1: Logo chính + Tên chính
-    htmlParts.push(`
-        <div class="ew-item-group">
-            <img src="${CONFIG.mainLogoUrl}" alt="Main Logo" class="ew-main-logo">
-            <div class="ew-text-box">
-                <div class="ew-title">${CONFIG.mainName}</div>
-                ${CONFIG.singleSubName ? `<div class="ew-subtitle">${CONFIG.singleSubName}</div>` : ''}
-            </div>
-        </div>
-    `);
-
-    // Các cụm tiếp theo: Logo phụ + Tên riêng của từng logo phụ
-    CONFIG.subLogos.forEach((logoUrl, index) => {
-        let subNameText = CONFIG.subNames[index] || ""; 
-        htmlParts.push(`<span class="ew-multiplier">&times;</span>`);
-        htmlParts.push(`
-            <div class="ew-item-group">
-                <img src="${logoUrl}" alt="Sub Logo ${index + 1}" class="ew-sub-logo">
-                ${subNameText ? `
-                    <div class="ew-text-box">
-                        <div class="ew-subtitle">${subNameText}</div>
-                    </div>
-                ` : ''}
-            </div>
-        `);
-    });
 
     const splash = document.createElement('div');
     splash.id = 'ew-screen';
     splash.className = 'ew-turning-on';
-    splash.innerHTML = `
-        <div class="ew-content">
-            ${htmlParts.join('')}
-        </div>
-    `;
+    splash.innerHTML = `<div id="ew-container" style="display:flex; align-items:center; justify-content:center;"></div>`;
     
     if (document.body) {
         document.body.prepend(splash);
@@ -221,21 +179,93 @@
         document.addEventListener('DOMContentLoaded', () => document.body.prepend(splash));
     }
 
-    // === 5. Điều phối Timeline Hiệu ứng ===
+    // === 4. Điều phối hiển thị tùy theo style (slide hay các kiểu khác) ===
     function runSplash() {
-        const content = splash.querySelector('.ew-content');
-        if (!content) return;
+        const container = document.getElementById('ew-container');
+        if (!container) return;
 
-        setTimeout(() => { content.classList.add('ew-show'); }, 200);
-        setTimeout(() => { content.classList.add('ew-fade-out'); }, CONFIG.duration - 1000);
-        setTimeout(() => {
-            if (ewStyle === 'explosion' || ewStyle === 'sony') {
-                splash.classList.add('ew-flash-effect');
-                setTimeout(() => splash.classList.remove('ew-flash-effect'), 150);
+        if (ewStyle === 'slide') {
+            // --- KIỂU SLIDE: Trình chiếu tuần tự từng logo một ---
+            container.innerHTML = `<div id="ew-slide-box" class="ew-content-box"></div>`;
+            const slideBox = document.getElementById('ew-slide-box');
+            let index = 0;
+            const timePerSlide = 1400; 
+            const transitionDelay = 400;
+
+            function nextSlide() {
+                if (index >= sequenceList.length) {
+                    setTimeout(() => {
+                        splash.classList.add('ew-active-open');
+                    }, 200);
+                    setTimeout(() => { splash.remove(); }, 900);
+                    return;
+                }
+
+                const item = sequenceList[index];
+                slideBox.innerHTML = `
+                    <img src="${item.logo}" alt="Logo" class="ew-logo-img">
+                    <div class="ew-text-group">
+                        <div class="ew-title">${item.title}</div>
+                        ${item.subtitle ? `<div class="ew-subtitle">${item.subtitle}</div>` : ''}
+                    </div>
+                `;
+
+                setTimeout(() => { slideBox.classList.add('ew-show'); }, 50);
+                setTimeout(() => {
+                    slideBox.classList.remove('ew-show');
+                    slideBox.classList.add('ew-hide');
+                }, timePerSlide - transitionDelay);
+
+                setTimeout(() => {
+                    slideBox.classList.remove('ew-hide');
+                    index++;
+                    nextSlide();
+                }, timePerSlide);
             }
-            splash.classList.add('ew-active-open');
-        }, CONFIG.duration - 400);
-        setTimeout(() => { splash.remove(); }, CONFIG.duration + 400);
+            setTimeout(nextSlide, 300);
+
+        } else {
+            // --- CÁC KIỂU KHÁC (lg, sony, astronaut, explosion...): Hiển thị đồng thời toàn bộ ---
+            let htmlParts = [];
+            htmlParts.push(`
+                <div class="ew-item-group">
+                    <img src="${FIXED_MAIN_LOGO}" alt="Main Logo" class="ew-main-logo-static">
+                    <div class="ew-text-box-static">
+                        <div class="ew-title" style="font-size:24px;">${FIXED_MAIN_NAME}</div>
+                        ${subNameSingleAttr ? `<div class="ew-subtitle" style="font-size:15px;">${subNameSingleAttr}</div>` : ''}
+                    </div>
+                </div>
+            `);
+
+            subLogosArray.forEach((logoUrl, i) => {
+                let subNameText = subNamesArray[i] || "";
+                htmlParts.push(`<span class="ew-multiplier">&times;</span>`);
+                htmlParts.push(`
+                    <div class="ew-item-group">
+                        <img src="${logoUrl}" alt="Sub Logo" class="ew-sub-logo-static">
+                        ${subNameText ? `
+                            <div class="ew-text-box-static">
+                                <div class="ew-subtitle" style="font-size:15px;">${subNameText}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `);
+            });
+
+            container.innerHTML = `<div id="ew-static-content" class="ew-static-wrap">${htmlParts.join('')}</div>`;
+            const staticContent = document.getElementById('ew-static-content');
+
+            setTimeout(() => { staticContent.classList.add('ew-show'); }, 200);
+            setTimeout(() => { staticContent.classList.add('ew-fade-out'); }, CONFIG_DURATION - 1000 || 2800);
+            setTimeout(() => {
+                if (ewStyle === 'explosion' || ewStyle === 'sony') {
+                    splash.classList.add('ew-flash-effect');
+                    setTimeout(() => splash.classList.remove('ew-flash-effect'), 150);
+                }
+                splash.classList.add('ew-active-open');
+            }, 3400);
+            setTimeout(() => { splash.remove(); }, 3800);
+        }
     }
 
     if (document.readyState === 'complete') {
@@ -244,3 +274,4 @@
         window.addEventListener('load', runSplash);
     }
 })();
+                
