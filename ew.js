@@ -2,6 +2,56 @@
     // === 1. CỐ ĐỊNH LOGO CHÍNH & TÊN CHÍNH ===
     const FIXED_MAIN_LOGO = "https://raw.githubusercontent.com/protech-code/.github/refs/heads/main/Protech%20logo.png";
     const FIXED_MAIN_NAME = "PROTECH GROUP";
+    // Thêm ngay sau FIXED_MAIN_NAME
+    const STATIC_DURATION = 3800;
+    const STATIC_FADE_OUT_AT = 2800;
+    
+    // Chỉ cho phép URL HTTP/HTTPS
+    function safeImageUrl(value) {
+        if (!value) return "";
+    
+        try {
+            const url = new URL(value, document.baseURI);
+    
+            return ["https:", "http:"].includes(url.protocol)
+                ? url.href
+                : "";
+        } catch {
+            return "";
+        }
+    }
+    
+    function createImage(url, alt, className) {
+        const image = document.createElement("img");
+    
+        image.alt = alt;
+        image.className = className;
+        image.loading = "eager";
+        image.decoding = "async";
+    
+        const safeUrl = safeImageUrl(url);
+    
+        if (safeUrl) {
+            image.src = safeUrl;
+        } else {
+            image.hidden = true;
+        }
+    
+        image.addEventListener("error", () => {
+            image.hidden = true;
+        }, { once: true });
+    
+        return image;
+    }
+    
+    function createTextElement(tagName, className, value) {
+        const element = document.createElement(tagName);
+    
+        element.className = className;
+        element.textContent = value || "";
+    
+        return element;
+    }
 
     // === 2. Đọc dữ liệu từ thẻ <script đang nhúng> ===
     const currentScript = document.currentScript;
@@ -268,10 +318,14 @@
         }
     }
 
-    if (document.readyState === 'complete') {
+    // Phần cuối file: thay listener load cũ
+    
+    if (document.readyState === "complete") {
         runSplash();
     } else {
-        window.addEventListener('load', runSplash);
+        window.addEventListener("load", runSplash, {
+            once: true
+        });
     }
 })();
                 
